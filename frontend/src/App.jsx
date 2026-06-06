@@ -1,6 +1,8 @@
+import React from 'react';
+
 const App = () => {
   return (
-    <h1>React App running</h1>
+    <div>React project</div>
   );
 };
 
