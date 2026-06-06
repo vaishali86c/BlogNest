@@ -6,22 +6,13 @@ dotenv.config();
 
 const PORT = process.env.PORT || 5000;
 const HOST = process.env.HOST || '127.0.0.1';
-let server;
 
-const startServer = async () => {
-  if (process.env.MONGODB_URI) {
-    try {
-      await connectDB();
-    } catch (error) {
-      console.warn('MongoDB connection skipped:', error.message);
-    }
-  } else {
-    console.warn('MONGODB_URI is not set. Server will start without MongoDB.');
-  }
-
-  server = app.listen(PORT, HOST, () => {
-    console.log(`Server running on http://${HOST}:${PORT}`);
-  });
-};
-
-startServer();
+connectDB()
+.then(() => {
+    app.listen(process.env.PORT, () => {
+        console.log(` Server is running at port : ${process.env.PORT}`);
+    })
+})
+.catch((err) => {
+    console.log("MONGO db connection failed !!! ", err);
+})
