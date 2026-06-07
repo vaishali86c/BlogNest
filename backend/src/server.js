@@ -1,6 +1,6 @@
 import dotenv from 'dotenv';
 import app from './app.js';
-import { connectDB } from './config/db.js';
+import { connectDB } from './db/db.js';
 
 dotenv.config();
 
@@ -9,8 +9,8 @@ const HOST = process.env.HOST || '127.0.0.1';
 
 connectDB()
 .then(() => {
-    app.listen(process.env.PORT, () => {
-        console.log(` Server is running at port : ${process.env.PORT}`);
+    app.listen(PORT, HOST, () => {
+        console.log(`Server is running at http://${HOST}:${PORT}`);
     })
 })
 .catch((err) => {
