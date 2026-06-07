@@ -1,17 +1,26 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
-const SignIn = () => {
+const SignUp = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
 
   return (
     <section className="flex min-h-[calc(100vh-118px)] items-start justify-center px-4 py-8 sm:min-h-[calc(100vh-88px)] sm:items-center sm:py-10">
       <div className="w-full max-w-sm sm:max-w-md">
-        <h1 className="mb-10 text-center font-serif text-2xl font-semibold leading-tight text-zinc-900 sm:mb-16 sm:text-3xl">
-          Welcome back to BlogNest
+        <h1 className="mb-10 text-center font-serif text-3xl font-semibold leading-tight text-zinc-900 sm:mb-16 sm:text-3xl">
+          Join Us Today
         </h1>
 
         <form className="space-y-4">
+          <label className="flex h-12 items-center gap-3 bg-zinc-100 px-4 text-zinc-500 sm:gap-4 sm:px-5">
+            <i className="fi fi-rr-user text-base leading-none text-zinc-800 sm:text-lg"></i>
+            <input
+              className="min-w-0 w-full bg-transparent text-sm font-medium text-zinc-900 outline-none placeholder:text-zinc-500 sm:text-base"
+              type="text"
+              placeholder="Full name"
+            />
+          </label>
+
           <label className="flex h-12 items-center gap-3 bg-zinc-100 px-4 text-zinc-500 sm:gap-4 sm:px-5">
             <i className="fi fi-rr-envelope text-base leading-none text-zinc-800 sm:text-lg"></i>
             <input
@@ -42,12 +51,12 @@ const SignIn = () => {
             </button>
           </label>
 
-          <div className="flex justify-center pt-3 sm:pt-4">
+          <div className="flex justify-center pt-4 sm:pt-5">
             <button
               className="h-11 rounded-full bg-zinc-950 px-7 text-sm font-semibold text-white hover:bg-zinc-800 sm:h-12 sm:px-8 sm:text-base"
               type="submit"
             >
-              Sign In
+              Sign Up
             </button>
           </div>
         </form>
@@ -60,16 +69,14 @@ const SignIn = () => {
           className="flex h-12 w-full items-center justify-center gap-3 rounded-full bg-zinc-950 px-4 text-sm font-semibold text-white hover:bg-zinc-800 sm:h-14 sm:gap-4 sm:text-base"
           type="button"
         >
-          <span className="text-xl font-bold text-white">
-            <span className="text-blue-500">G</span>
-          </span>
+          <span className="text-xl font-bold text-blue-500">G</span>
           <span>Continue With Google</span>
         </button>
 
         <p className="mt-6 text-center text-sm font-medium text-zinc-500 sm:mt-8 sm:text-base">
-          Don&apos;t have an account ?{' '}
-          <Link className="font-semibold text-zinc-700 underline" to="/signup">
-            Join us today.
+          Already a member ?{' '}
+          <Link className="font-semibold text-zinc-700 underline" to="/signin">
+            Sign in here
           </Link>
         </p>
       </div>
@@ -77,4 +84,4 @@ const SignIn = () => {
   );
 };
 
-export default SignIn;
+export default SignUp;
