@@ -44,3 +44,8 @@ npm run dev --prefix backend
 ```
 
 Frontend: `http://127.0.0.1:5173`
+
+BlogNest:
+
+- Google auth, jwt token
+- authentication for signup signin
