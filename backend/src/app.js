@@ -17,9 +17,11 @@ app.use(express.static("public"))
 // routes import
 
 import userRouter from './routes/auth.route.js'
+import blogRouter from './routes/blog.route.js'
 
 // routes declaration
 app.use("/api/v1/users", userRouter)
+app.use('/api/v1/blogs', blogRouter);  // blog route
 
 // global error handler
 app.use(errorHandler)
