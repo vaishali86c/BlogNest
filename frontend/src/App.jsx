@@ -4,6 +4,7 @@ import Navbar from './components/navbar.component.jsx';
 import Home from './components/home.component.jsx';
 import SignIn from './pages/signin.page.jsx';
 import SignUp from './pages/signup.page.jsx';
+import WriteBlog from './components/write.component.jsx';
 
 const App = () => {
   return (
@@ -13,7 +14,10 @@ const App = () => {
           <Route index element={<Home />} />
           <Route path="signin" element={<SignIn />} />
           <Route path="signup" element={<SignUp />} />
-          <Route path="write" element={<h1>Write page</h1>} />
+        </Route>
+        <Route path="write" element={<WriteBlog />} >
+          {/* <Route path="publish" element={<h1>Publish page</h1>} />
+          <Route path="save-draft" element={<h1>save draft</h1>} /> */}
         </Route>
       </Routes>
     </main>
