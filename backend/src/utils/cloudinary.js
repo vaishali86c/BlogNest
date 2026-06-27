@@ -1,6 +1,6 @@
 import { v2 as cloudinary } from 'cloudinary';
-import fs from 'fs';  
-
+import fs from 'fs';
+import ApiError from './ApiError.js';
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -28,7 +28,8 @@ const uploadOnCloudinary = async (localFilePath) => {
         if (fs.existsSync(localFilePath)) {
             fs.unlinkSync(localFilePath); // Delete the local file if it exists
         }
-        throw error; // Rethrow the error to be handled by the caller
+        // Wrap raw Cloudinary errors so the global error handler returns a consistent response
+        throw new ApiError(500, error?.message || 'Cloudinary upload failed');
     }
 }
 

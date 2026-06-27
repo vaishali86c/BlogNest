@@ -9,10 +9,24 @@ import generateToken from '../utils/generateToken.js'
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
 
+// Generate a unique username from a display name or email
+const generateUsername = async (name) => {
+    const base = name
+        .toLowerCase()
+        .replace(/\s+/g, '_')
+        .replace(/[^a-z0-9_]/g, '')
+        .slice(0, 20) || 'user'
+    const suffix = Math.floor(1000 + Math.random() * 9000)
+    const username = `${base}_${suffix}`
+    const exists = await User.findOne({ 'personal_info.username': username })
+    return exists ? generateUsername(name) : username // retry on collision
+}
+
 const buildAuthResponse = (user, token) => ({
     user: {
         _id: user._id,
         fullname: user.personal_info.fullname,
+        username: user.personal_info.username,
         email: user.personal_info.email,
         profile_img: user.personal_info.profile_img,
         joinedAt: user.joinedAt
@@ -39,12 +53,14 @@ const signUp = asyncHandler(async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10)
+    const username = await generateUsername(fullname)
 
     const user = await User.create({
         personal_info: {
             fullname,
             email: normalizedEmail,
-            password: hashedPassword
+            password: hashedPassword,
+            username
         }
     })
 
@@ -130,11 +146,13 @@ const googleAuth = asyncHandler(async (req, res) => {
     })
 
     if (!user) {
+        const username = await generateUsername(payload.name || normalizedEmail.split('@')[0])
         user = await User.create({
             personal_info: {
                 fullname: payload.name,
                 email: normalizedEmail,
-                profile_img: payload.picture
+                profile_img: payload.picture,
+                username
             },
             google_auth: true
         })
