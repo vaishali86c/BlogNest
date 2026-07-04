@@ -21,8 +21,20 @@ const blogSchema = mongoose.Schema({
         // required: true
     },
     content: {
-        type: [],
-        // required: true
+        type: {
+            blocks: {
+                type: [
+                    {
+                        id:   { type: String },
+                        type: { type: String, required: true },
+                        data: { type: Schema.Types.Mixed, required: true },
+                        _id: false
+                    }
+                ],
+                default: []
+            }
+        },
+        default: () => ({ blocks: [] })
     },
     tags: {
         type: [String],
