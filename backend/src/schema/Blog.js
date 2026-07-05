@@ -21,10 +21,6 @@ const blogSchema = mongoose.Schema({
         // required: true
     },
     content: {
-<<<<<<< Updated upstream
-        type: [],
-        // required: true
-=======
         // EditorJS shape: { blocks: [{ id, type, data }] }
         // No `type:` wrapper — Mongoose infers the nested sub-document automatically
         blocks: {
@@ -38,7 +34,6 @@ const blogSchema = mongoose.Schema({
             ],
             default: []
         }
->>>>>>> Stashed changes
     },
     tags: {
         type: [String],
