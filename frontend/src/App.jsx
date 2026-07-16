@@ -6,7 +6,6 @@ import SignIn from './pages/signin.page.jsx';
 import SignUp from './pages/signup.page.jsx';
 import WriteBlog from './components/write.component.jsx';
 
-import WriteBlog from './components/write.component.jsx';
 import { UserContextProvider } from './contexts/UserContext.jsx';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { Toaster } from 'react-hot-toast';
