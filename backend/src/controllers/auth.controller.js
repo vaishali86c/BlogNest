@@ -87,7 +87,7 @@ const signIn = asyncHandler(async (req, res) => {
 
     const user = await User.findOne({
         'personal_info.email': normalizedEmail
-    })
+    }).select('+personal_info.password')
 
     if (!user) {
         throw new ApiError(404, 'User not found')
