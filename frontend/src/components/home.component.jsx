@@ -12,7 +12,7 @@ const Home = () => {
     setLoading(true);
     try {
       // Assuming your backend runs on port 5000 and the route is /api/v1/blogs
-      const response = await fetch(`http://localhost:5000/api/v1/blogs?page=${pageToFetch}&limit=10`);
+      const response = await fetch(`${import.meta.env.VITE_SERVER_DOMAIN}/api/v1/blogs?page=${pageToFetch}&limit=10`);
       
       if (!response.ok) {
         throw new Error('Network response was not ok');

@@ -119,10 +119,14 @@ const getBlogById = asyncHandler(async (req, res) => {
         { new: true }
     ).populate('author', 'personal_info.fullname personal_info.username personal_info.profile_img personal_info.bio');
 
+    if (!blog) throw new ApiError(404, 'Blog not found');
+
     // Also increment author's total_reads
-    await User.findByIdAndUpdate(blog.author._id, {
-        $inc: { 'account_info.total_reads': 1 }
-    });
+    if (blog.author?._id) {
+        await User.findByIdAndUpdate(blog.author._id, {
+            $inc: { 'account_info.total_reads': 1 }
+        });
+    }
 
     return res.status(200).json(new ApiResponse(200, { blog }, 'Blog fetched successfully'));
 });
