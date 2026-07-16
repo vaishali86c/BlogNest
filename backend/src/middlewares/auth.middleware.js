@@ -5,9 +5,13 @@ import User from '../schema/User.js'
 
 export const verifyToken = asyncHandler(async (req, res, next) => {
 
-    const authHeader = req.headers.authorization
+    // Prefer httpOnly cookie, fall back to Authorization header (for API clients)
+    let token = req.cookies?.token;
 
-    const token = authHeader?.startsWith('Bearer ')?authHeader.split(' ')[1]:null
+    if (!token) {
+        const authHeader = req.headers.authorization;
+        token = authHeader?.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
+    }
 
     if (!token) {
         throw new ApiError(401, 'Unauthorized request');

@@ -9,20 +9,36 @@ import generateToken from '../utils/generateToken.js'
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
 
-// Generate a unique username from a display name or email
+const MAX_USERNAME_ATTEMPTS = 10;
+
+// Cookie options for the httpOnly JWT cookie
+const cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    path: '/',
+};
+
+// Generate a unique username — iterative with max attempts to avoid stack overflow
 const generateUsername = async (name) => {
     const base = name
         .toLowerCase()
         .replace(/\s+/g, '_')
         .replace(/[^a-z0-9_]/g, '')
         .slice(0, 20) || 'user'
-    const suffix = Math.floor(1000 + Math.random() * 9000)
-    const username = `${base}_${suffix}`
-    const exists = await User.findOne({ 'personal_info.username': username })
-    return exists ? generateUsername(name) : username // retry on collision
+
+    for (let attempt = 0; attempt < MAX_USERNAME_ATTEMPTS; attempt++) {
+        const suffix = Math.floor(1000 + Math.random() * 9000)
+        const username = `${base}_${suffix}`
+        const exists = await User.findOne({ 'personal_info.username': username })
+        if (!exists) return username
+    }
+
+    throw new ApiError(500, 'Failed to generate a unique username. Please try again.')
 }
 
-const buildAuthResponse = (user, token) => ({
+const buildAuthResponse = (user) => ({
     user: {
         _id: user._id,
         fullname: user.personal_info.fullname,
@@ -31,7 +47,7 @@ const buildAuthResponse = (user, token) => ({
         profile_img: user.personal_info.profile_img,
         joinedAt: user.joinedAt
     },
-    token
+    // Token is NOT included in the response body — it's set as an httpOnly cookie
 })
 
 const signUp = asyncHandler(async (req, res) => {
@@ -66,13 +82,15 @@ const signUp = asyncHandler(async (req, res) => {
 
     const token = generateToken(user)
 
-    res.status(201).json(
-        new ApiResponse(
-            201,
-            buildAuthResponse(user, token),
-            'User signed up successfully'
-        )
-    )
+    res.cookie('token', token, cookieOptions)
+       .status(201)
+       .json(
+           new ApiResponse(
+               201,
+               buildAuthResponse(user),
+               'User signed up successfully'
+           )
+       )
 })
 
 const signIn = asyncHandler(async (req, res) => {
@@ -89,8 +107,10 @@ const signIn = asyncHandler(async (req, res) => {
         'personal_info.email': normalizedEmail
     }).select('+personal_info.password')
 
+    // Use a single generic message for both "not found" and "wrong password"
+    // to prevent user-enumeration attacks
     if (!user) {
-        throw new ApiError(404, 'User not found')
+        throw new ApiError(401, 'Invalid email or password')
     }
 
     if (user.google_auth && !user.personal_info.password) {
@@ -103,18 +123,20 @@ const signIn = asyncHandler(async (req, res) => {
     )
 
     if (!isPasswordValid) {
-        throw new ApiError(401, 'Invalid credentials')
+        throw new ApiError(401, 'Invalid email or password')
     }
 
     const token = generateToken(user)
 
-    res.status(200).json(
-        new ApiResponse(
-            200,
-            buildAuthResponse(user, token),
-            'User signed in successfully'
-        )
-    )
+    res.cookie('token', token, cookieOptions)
+       .status(200)
+       .json(
+           new ApiResponse(
+               200,
+               buildAuthResponse(user),
+               'User signed in successfully'
+           )
+       )
 })
 
 const googleAuth = asyncHandler(async (req, res) => {
@@ -160,17 +182,31 @@ const googleAuth = asyncHandler(async (req, res) => {
 
     const token = generateToken(user)
 
-    res.status(200).json(
-        new ApiResponse(
-            200,
-            buildAuthResponse(user, token),
-            'Google authentication successful'
-        )
-    )
+    res.cookie('token', token, cookieOptions)
+       .status(200)
+       .json(
+           new ApiResponse(
+               200,
+               buildAuthResponse(user),
+               'Google authentication successful'
+           )
+       )
+})
+
+const signOut = asyncHandler(async (req, res) => {
+    res.clearCookie('token', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+    })
+    .status(200)
+    .json(new ApiResponse(200, {}, 'Signed out successfully'))
 })
 
 export {
     signUp,
     signIn,
-    googleAuth
+    googleAuth,
+    signOut,
 }
