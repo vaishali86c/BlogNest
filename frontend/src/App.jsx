@@ -4,6 +4,7 @@ import Navbar from './components/navbar.component.jsx';
 import Home from './components/home.component.jsx';
 import SignIn from './pages/signin.page.jsx';
 import SignUp from './pages/signup.page.jsx';
+import WriteBlog from './components/write.component.jsx';
 
 import WriteBlog from './components/write.component.jsx';
 import { UserContextProvider } from './contexts/UserContext.jsx';

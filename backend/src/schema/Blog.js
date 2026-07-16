@@ -21,8 +21,19 @@ const blogSchema = mongoose.Schema({
         // required: true
     },
     content: {
-        type: [],
-        // required: true
+        // EditorJS shape: { blocks: [{ id, type, data }] }
+        // No `type:` wrapper — Mongoose infers the nested sub-document automatically
+        blocks: {
+            type: [
+                {
+                    id:   { type: String },
+                    type: { type: String },
+                    data: { type: Schema.Types.Mixed },
+                    _id: false
+                }
+            ],
+            default: []
+        }
     },
     tags: {
         type: [String],
@@ -60,12 +71,12 @@ const blogSchema = mongoose.Schema({
         default: false
     }
 
-}, 
-{ 
-    timestamps: {
-        createdAt: 'publishedAt'
-    } 
+},
+    {
+        timestamps: {
+            createdAt: 'publishedAt'
+        }
 
-})
+    })
 
 export default mongoose.model("blogs", blogSchema);
