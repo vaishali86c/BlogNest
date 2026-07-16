@@ -1,39 +1,29 @@
-// Frontend/Postman uploads image with key "banner"
-// ↓
-// Multer receives file
-// ↓
-// Checks file size
-// ↓
-// Checks file type
-// ↓
-// Saves file temporarily in public/temp
-// ↓
-// Controller uploads that file to Cloudinary
-// ↓
-// Local temp file gets deleted
-
 import multer from 'multer';
-
+import crypto from 'crypto';
+import path from 'path';
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'public/temp') // Temporary storage location
+        cb(null, 'public/temp');
     },
     filename: function (req, file, cb) {
-        cb(null, `${Date.now()}-${file.originalname}`);
+        // Use a random hex string instead of the user-supplied originalname
+        // to prevent path-traversal attacks (e.g. "../../etc/passwd")
+        const safeName = `${Date.now()}-${crypto.randomBytes(8).toString('hex')}${path.extname(file.originalname)}`;
+        cb(null, safeName);
     }
 });
 
 export const upload = multer({
     storage,
     limits: {
-        fileSize: 2 * 1024 * 1024
+        fileSize: 2 * 1024 * 1024 // 2 MB
     },
     fileFilter: function (req, file, cb) {
         if (file.mimetype.startsWith('image/')) {
-      cb(null, true);
-      return;
-    }
+            cb(null, true);
+            return;
+        }
         cb(new Error('Only image files are allowed'));
     }
-})
+});

@@ -1,9 +1,13 @@
 import asyncHandler from '../utils/asyncHandler.js';
 import ApiError from '../utils/ApiError.js';
 import ApiResponse from '../utils/ApiResponse.js';
+import { sanitizeContent } from '../utils/sanitize.js';
 import uploadOnCloudinary from '../utils/cloudinary.js';
 import Blog from '../schema/Blog.js';
 import User from '../schema/User.js';
+
+const MAX_TAGS = 10;
+const MAX_TAG_LENGTH = 30;
 
 // Normalise EditorJS content — accept { blocks: [] } or bare []
 const normalizeContent = (content) => {
@@ -45,6 +49,16 @@ const createBlog = asyncHandler(async (req, res) => {
         throw new ApiError(400, 'Title is required')
     }
 
+    // Validate tags
+    if (tags) {
+        if (!Array.isArray(tags) || tags.length > MAX_TAGS) {
+            throw new ApiError(400, `Tags must be an array of at most ${MAX_TAGS} items`);
+        }
+        if (tags.some(t => typeof t !== 'string' || t.length > MAX_TAG_LENGTH)) {
+            throw new ApiError(400, `Each tag must be a string of at most ${MAX_TAG_LENGTH} characters`);
+        }
+    }
+
     // Generate unique blog_id from title + timestamp
 
     const blog_id = title
@@ -54,12 +68,15 @@ const createBlog = asyncHandler(async (req, res) => {
         .slice(0, 50) + '-' +
         Date.now();
 
+    // Sanitize content to prevent stored XSS
+    const safeContent = sanitizeContent(normalizeContent(content));
+
     const blog = await Blog.create({
         blog_id,
         title,
         des,
         banner,
-        content,
+        content: safeContent,
         tags,
         author: authorId,
         draft: draft ?? false
@@ -146,7 +163,7 @@ const updateBlog = asyncHandler(async (req, res) => {
     if (title !== undefined) blog.title = title;
     if (des !== undefined) blog.des = des;
     if (banner !== undefined) blog.banner = banner;
-    if (content !== undefined) blog.content = normalizeContent(content);
+    if (content !== undefined) blog.content = sanitizeContent(normalizeContent(content));
     if (tags !== undefined) blog.tags = tags;
     if (draft !== undefined) blog.draft = draft;
 
